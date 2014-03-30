@@ -1,57 +1,54 @@
 package main
 
 import (
-    "fmt"
+//    "fmt"
     "io/ioutil"
-    "net/http"
-    "strings"
-    l4g "code.google.com/p/log4go"
-    "database/sql"
+    "os"
+//    "net/http"
+//    "strings"
+//    "database/sql"
     _ "github.com/lib/pq"
     "encoding/xml"
+    glog "github.com/golang/glog"
 )
 
-type ConnectInfo struct {
-    XMLName    xml.Name    `xml."databases"`
-    Connection []DataConnection `xml:"database"`
-} 
-
-var pgConnection string
+type DataConnection struct {
+    xml.Name `xml:"person"`
+    DbType   string `xml:"dbtype"`
+    Host     string `xml:"host"`
+    User     string `xml:"user"`
+    Database string `xml:"dbname"`
+    Password string `xml:"password"`
+}
 
 func main() {
 
-    // read application configuration
-    l4g.LoadConfiguration("conf/log.xml")
-    defer l4g.Close()
+    var configFile = "conf/database.xml"
 
-    // read the database config
-    LoadDatabaseConfig("conf/database.xml")    
-
-    // map the endpoints to codepaths
-    
-}
-
-func LoadDatabaseConfig() {
     connectFile, error := os.Open(configFile)
     if error != nil {
-        l4g.Error("Failed to open config file %s, err %v", configFile, error)
-        return error
+        glog.Error("Failed to open config file %s, err %v", configFile, error)
+        return 
     }
 
-    connectDetails, error := ioutil.ReadAll(configFile)
+    connectDetails, error := ioutil.ReadAll(connectFile)
     if error != nil {
-        l4g.Error("Failed to read file %s, err %v", configFile, error)
-        return error
+        glog.Error("Failed to read file %s, err %v", configFile, error)
+        return 
     }
 
-    error := xml.Unmarshal(connectDetails, ConnectInfo);
-    if err != nil {
-        l4g.Error("Failed to unmarshal %s: %v", configFile, error)
+    v := new(DataConnection)
+
+    xmlError := xml.Unmarshal(connectDetails, &v)
+    if xmlError != nil {
+        glog.Error("Failed to unmarshal %s: %v", configFile, xmlError)
     }
 
+
+    glog.Error("Oh hai here's some database %s", v)
     
-    pgConnection = fmt.Sprintf("user=%s password=%s host=%s dbname=%s", connection.User, connection.Password, connection.Host, connection.Database)
-    return nil
+//    pgConnection = fmt.Sprintf("user=%s password=%s host=%s dbname=%s", connection.User, connection.Password, connection.Host, connection.Database)
+    return 
 }
 
 
