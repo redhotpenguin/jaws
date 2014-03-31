@@ -1,12 +1,12 @@
 package main
 
 import (
-//    "fmt"
+    "fmt"
     "io/ioutil"
     "os"
 //    "net/http"
 //    "strings"
-//    "database/sql"
+    "database/sql"
     _ "github.com/lib/pq"
     "encoding/xml"
     glog "github.com/golang/glog"
@@ -45,8 +45,16 @@ func main() {
     }
 
 
-    glog.Error("Oh hai here's some database %s", v)
-    
+    connectString := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable host=%s", v.User, v.Password, v.Database, v.Host)
+ 
+    db, err := sql.Open("postgres", connectString)
+    if err != nil {
+        glog.Error(err)
+    } 
+
+
+    glog.Error(fmt.Sprintf("Oh hai here's some database %v", db))
+ 
 //    pgConnection = fmt.Sprintf("user=%s password=%s host=%s dbname=%s", connection.User, connection.Password, connection.Host, connection.Database)
     return 
 }
