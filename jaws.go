@@ -101,8 +101,7 @@ func list(val string) string {
 			glog.Error(exception)
 			return exception
 		}
-
-        // map the query result into a struct for json translation
+		// map the query result into a struct for json translation
 		dsaResult := DsaQuery{
 			Id:             Row.Id,
 			SourceFile:     Row.SourceFile,
@@ -113,20 +112,10 @@ func list(val string) string {
 			Query:          Row.Query,
 		}
 
-		glog.Info(fmt.Sprintf("Result is %s"), dsaResult)
-
-		b, err := json.Marshal(Row)
-		if err != nil {
-			glog.Error(err)
-		}
-
-		glog.Info(fmt.Sprintf("b result is %s", b))
-
-		return fmt.Sprintf("%s", b)
+		// glog.Info(fmt.Sprintf("Result is %s"), dsaResult)
 
 		// add this result onto the slice (array)
 		dsaResults = append(dsaResults, dsaResult)
-		//res = append(res, resString)
 	}
 
 	if err := rows.Err(); err != nil {
