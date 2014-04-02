@@ -2,8 +2,8 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"encoding/xml"
-    "encoding/json"
 	"flag"
 	"fmt"
 	"github.com/golang/glog"
@@ -11,11 +11,10 @@ import (
 	_ "github.com/lib/pq"
 	"io/ioutil"
 	"os"
-	//"strings"
 )
 
 type DataConnection struct {
-	xml.Name        `xml:"person"`
+	xml.Name `xml:"person"`
 	DbType   string `xml:"dbtype"`
 	Host     string `xml:"host"`
 	User     string `xml:"user"`
@@ -24,12 +23,12 @@ type DataConnection struct {
 }
 
 type DsaQuery struct {
-	Id              int
-	Query           string
-	SourceFile      string
-	SourceFunction  string
-	SourceLine      int
-	IssueTicket     string
+	Id             int
+	Query          string
+	SourceFile     string
+	SourceFunction string
+	SourceLine     int
+	IssueTicket    string
 	ApiCall        string
 }
 
@@ -84,47 +83,46 @@ func list(val string) string {
 		return exception
 	}
 
-			//&Row.query,
-	glog.Info("query successful")
 	var dsaResults []DsaQuery
 	for rows.Next() {
 
 		var Row DsaQuery
 		if err := rows.Scan(
-            &Row.Id,
-            &Row.Query,
+			&Row.Id,
+			&Row.Query,
 			&Row.SourceFile,
 			&Row.SourceFunction,
 			&Row.SourceLine,
 			&Row.IssueTicket,
 			&Row.ApiCall,
-        ); err != nil {
+		); err != nil {
 
 			exception := fmt.Sprintf("query failure: %s", err)
 			glog.Error(exception)
 			return exception
 		}
 
+        // map the query result into a struct for json translation
 		dsaResult := DsaQuery{
 			Id:             Row.Id,
 			SourceFile:     Row.SourceFile,
 			SourceFunction: Row.SourceFunction,
-			SourceLine: Row.SourceLine,
-            IssueTicket: Row.IssueTicket,
-            ApiCall: Row.ApiCall,
-            Query: Row.Query,
-        }
- 
-        glog.Info(fmt.Sprintf("q result is %s"), dsaResult)
+			SourceLine:     Row.SourceLine,
+			IssueTicket:    Row.IssueTicket,
+			ApiCall:        Row.ApiCall,
+			Query:          Row.Query,
+		}
 
-        b, err:= json.Marshal(Row)
-	    if err != nil {
-		    glog.Error(err)
-	    }
+		glog.Info(fmt.Sprintf("Result is %s"), dsaResult)
 
-        glog.Info(fmt.Sprintf("b result is %s", b))
-    
-        return fmt.Sprintf("%s",b)
+		b, err := json.Marshal(Row)
+		if err != nil {
+			glog.Error(err)
+		}
+
+		glog.Info(fmt.Sprintf("b result is %s", b))
+
+		return fmt.Sprintf("%s", b)
 
 		// add this result onto the slice (array)
 		dsaResults = append(dsaResults, dsaResult)
@@ -135,8 +133,8 @@ func list(val string) string {
 		glog.Error(err)
 	}
 
-    json, err := json.Marshal(dsaResults)
-    return fmt.Sprintf("%s",json)
+	json, err := json.Marshal(dsaResults)
+	return fmt.Sprintf("%s", json)
 }
 
 func main() {
